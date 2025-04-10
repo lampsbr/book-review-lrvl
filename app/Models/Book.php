@@ -38,9 +38,33 @@ class Book extends Model
         ], 'rating')->orderBy('reviews_avg_rating', 'desc');
     }
 
-    public function scopeMinReviews(Builder $query, $minReviews): Builder|Querybuilder {
+    public function scopeMinReviews(Builder $query, $minReviews): Builder|Querybuilder
+    {
         //use `having`for querying the return of aggregate functions. `Where wouldn't work in here. You could use subqueries too.
         return $query->having('reviews_count', '>=', $minReviews);
+    }
+
+    public function scopePopularLastMonth(Builder $query): Builder|Querybuilder
+    {
+        return $query->popular(now()->subMonth(), now())->highestRating(now()->subMonth(), now())->minReviews(2);
+    }
+    public function scopePopularLast6Months(Builder $query): Builder|Querybuilder
+    {
+        return $query->popular(now()->subMonths(6), now())->highestRating(now()->subMonths(6), now())->minReviews(5);
+    }
+    public function scopeHighestRatedLastMonth(Builder $query): Builder|Querybuilder
+    {
+        return $query
+            ->highestRating(now()->subMonth(), now())
+            ->popular(now()->subMonth(), now())
+            ->minReviews(2);
+    }
+    public function scopeHighestRatedLast6Months(Builder $query): Builder|Querybuilder
+    {
+        return $query
+            ->highestRating(now()->subMonths(6), now())
+            ->popular(now()->subMonths(6), now())
+            ->minReviews(5);
     }
 
     private function dateRangeFilter(Builder $q, $from = null, $to = null)
